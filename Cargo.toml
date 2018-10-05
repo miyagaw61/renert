@@ -1,0 +1,7 @@
+[package]
+name = "renert"
+version = "0.1.0"
+authors = ["miyagaw61 <miyagaw61@gmail.com>"]
+
+[dependencies]
+colored = "1.6.1"
