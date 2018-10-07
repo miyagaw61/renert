@@ -27,6 +27,16 @@ impl SystemResult {
     }
 }
 
+impl From<String> for SystemResult {
+    fn from(s: String) -> SystemResult {
+        let system_result = SystemResult {
+            stdout: "".to_string(),
+            stderr: format!("Failed to excute process: {}", s)
+        };
+        return system_result;
+    }
+}
+
 pub fn my_eprint(msg: String) {
     let header = [
         "== ".red().to_string(),
@@ -38,21 +48,16 @@ pub fn my_eprint(msg: String) {
     println!("{}", "=================================".red().to_string());
 }
 
-//pub fn gen_systemresult(oput: std::process::Output) -> Result<SystemResult, SystemResult> {
-//    let system_result = SystemResult::new(oput);
-//    if system_result.status == 1 {
-//        return Err(system_result);
-//    }
-//    return Ok(system_result);
-//}
-
 pub fn system_on_shell(command: &str) -> Result<SystemResult, SystemResult> {
     let oput = Command::new("sh")
         .arg("-c")
         .arg(command)
         .output()
-        .expect(format!("Failed to execute process: \"sh -c '{}'\"", command).as_str());
-    return SystemResult::new(oput);
+        .map_err(|e| e.to_string());
+    match oput {
+        Ok(oput) => return SystemResult::new(oput),
+        Err(e) => return Err(SystemResult::from(e))
+    }
 }
 
 pub fn process_on_shell(command: &str) {
@@ -68,8 +73,11 @@ pub fn system(command: &[&str]) -> Result<SystemResult, SystemResult> {
     let oput = Command::new(command[0])
         .args(&command[1..])
         .output()
-        .expect(format!("Failed to execute process: \"sh -c '{}'\"", command.join(" ")).as_str());
-    return SystemResult::new(oput);
+        .map_err(|e| e.to_string());
+    match oput {
+        Ok(oput) => return SystemResult::new(oput),
+        Err(e) => return Err(SystemResult::from(e))
+    }
 }
 
 pub fn process(command: &[&str]) {
