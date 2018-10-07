@@ -28,10 +28,10 @@ impl SystemResult {
 }
 
 impl From<String> for SystemResult {
-    fn from(s: String) -> SystemResult {
+    fn from(e: String) -> SystemResult {
         let system_result = SystemResult {
             stdout: "".to_string(),
-            stderr: format!("Failed to excute process: {}", s)
+            stderr: format!("Failed to excute process: {}", e)
         };
         return system_result;
     }
@@ -53,7 +53,7 @@ pub fn system_on_shell(command: &str) -> Result<SystemResult, SystemResult> {
         .arg("-c")
         .arg(command)
         .output()
-        .map_err(|e| e.to_string());
+        .map_err(|e| format!("{}: \"{}\"", e.to_string(), command));
     match oput {
         Ok(oput) => return SystemResult::new(oput),
         Err(e) => return Err(SystemResult::from(e))
@@ -73,7 +73,7 @@ pub fn system(command: &[&str]) -> Result<SystemResult, SystemResult> {
     let oput = Command::new(command[0])
         .args(&command[1..])
         .output()
-        .map_err(|e| e.to_string());
+        .map_err(|e| format!("{}: \"{}\"", e.to_string(), command.join(" ")));
     match oput {
         Ok(oput) => return SystemResult::new(oput),
         Err(e) => return Err(SystemResult::from(e))
