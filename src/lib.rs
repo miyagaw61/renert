@@ -1,5 +1,6 @@
 extern crate colored;
 
+use std::fs::OpenOptions;
 use std::process::Command;
 use colored::*;
 
@@ -86,4 +87,21 @@ pub fn process(command: &[&str]) {
         .spawn()
         .expect(format!("Failed to execute process: \"sh -c '{}'\"", command.join(" ")).as_str());
     child.wait().expect(format!("Failed to execute process: \"sh -c '{}'\"", command.join(" ")).as_str());
+}
+
+pub fn open(filename: &str, flag: &str) -> Result<std::fs::File, String> {
+    let mut op = OpenOptions::new();
+    if flag.contains("r") {
+        op.read(true);
+    }
+    if flag.contains("w") {
+        op.write(true);
+    }
+    if flag.contains("c") {
+        op.create(true);
+    }
+    if flag.contains("a") {
+        op.append(true);
+    }
+    return op.open(filename).map_err(|e| e.to_string());
 }
