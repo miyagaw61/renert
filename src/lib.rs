@@ -89,7 +89,7 @@ pub fn process(command: &[&str]) {
     child.wait().expect(format!("Failed to execute process: \"sh -c '{}'\"", command.join(" ")).as_str());
 }
 
-pub fn open(filename: &str, flag: &str) -> Result<std::fs::File, String> {
+pub fn my_open(filename: &str, flag: &str) -> Result<std::fs::File, String> {
     let mut op = OpenOptions::new();
     if flag.contains("r") {
         op.read(true);
@@ -104,4 +104,24 @@ pub fn open(filename: &str, flag: &str) -> Result<std::fs::File, String> {
         op.append(true);
     }
     return op.open(filename).map_err(|e| e.to_string());
+}
+
+pub fn str_mul(s: &str, n: i32) -> String {
+    let mut res: String = "".to_string();
+    for _ in 0..n {
+        for c in s.chars() {
+            res.push(c);
+        }
+    }
+    return res;
+}
+
+pub fn bytes_mul(bytes: &[u8], n: i32) -> std::vec::Vec<u8> {
+    let mut res = vec![];
+    for _ in 0..n {
+        for b in bytes {
+            res.push(*b);
+        }
+    }
+    return res;
 }
