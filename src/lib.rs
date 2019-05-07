@@ -1,7 +1,24 @@
 extern crate colored;
 
+use std::cmp;
+use std::process::{
+    exit,
+    Command
+};
 use std::fs::OpenOptions;
-use std::process::Command;
+use std::collections::{
+    HashMap,
+    VecDeque
+};
+use std::io::{
+    stdin,
+    stdout,
+    stderr,
+    Read,
+    Write,
+    BufReader,
+    BufWriter
+};
 use colored::*;
 
 #[macro_export]
