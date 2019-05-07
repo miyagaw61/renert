@@ -46,6 +46,16 @@ macro_rules! eln {
     };
 }
 
+#[macro_export]
+macro_rules! stdin {
+    () => ({
+        use std::io::Read;
+        let mut s = String::new();
+        std::io::stdin().read_to_string(&mut s).unwrap();
+        s
+    })
+}
+
 // ref: tanakh <https://qiita.com/tanakh/items/0ba42c7ca36cd29d0ac8>
 // diff: Don't lock stdin
 #[macro_export]
