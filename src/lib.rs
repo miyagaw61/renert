@@ -228,6 +228,81 @@ pub fn my_open(filename: &str, flag: &str) -> Result<std::fs::File, String> {
     return op.open(filename).map_err(|e| e.to_string());
 }
 
+pub fn npop(v: &mut Vec<char>, n: i32) -> Result<String, String> {
+    let mut res: Vec<char> = Vec::new();
+    for _ in 0..n {
+        let c = v.pop().ok_or("".to_string())?;
+        res.push(c);
+    }
+    res.reverse();
+    let ret: String = res.iter().map(|c| *c).collect();
+    return Ok(ret);
+}
+
+pub fn nget(v: &Vec<char>, n: i32) -> Result<String, String> {
+    let mut tmp_v = v.clone();
+    let res = npop(&mut tmp_v, n)?;
+    return Ok(res);
+}
+
+pub fn is_valid_range(v: &Vec<char>, idx_a: i32, idx_b: i32) -> bool {
+    let mut can = true;
+    if idx_a < 0 {
+        can = false;
+    }
+    let v_len = v.len() as i32;
+    if v_len < idx_b {
+        can = false;
+    }
+    return can;
+}
+
+pub fn get_range(v: &Vec<char>, idx_a: i32, idx_b: i32) -> Result<String, String> {
+    if ! is_valid_range(v, idx_a, idx_b) {
+        return Err("".to_string());
+    }
+    let mut res = String::new();
+    for (i,c) in v.iter().enumerate() {
+        let i = i as i32;
+        if i < idx_a {
+            continue;
+        }
+        if idx_b <= i {
+            break;
+        }
+        res.push(*c);
+    }
+    return Ok(res);
+}
+
+pub fn pop_range(v: &mut Vec<char>, idx_a: i32, idx_b: i32) -> Result<String, String> {
+    if ! is_valid_range(v, idx_a, idx_b) {
+        return Err("".to_string());
+    }
+    let mut res = String::new();
+    let mut pop_idxs: Vec<i32> = Vec::new();
+    for (i,c) in v.iter().enumerate() {
+        let i = i as i32;
+        if i < idx_a {
+            continue;
+        }
+        if idx_b <= i {
+            break;
+        }
+        res.push(*c);
+        pop_idxs.push(i);
+    }
+    for _ in 0..pop_idxs.len() {
+        match pop_idxs.pop() {
+            Some(idx) => {
+                v.remove(idx as usize);
+            },
+            None => {}
+        }
+    }
+    return Ok(res);
+}
+
 pub fn str_mul(s: &str, n: i32) -> String {
     let mut res: String = "".to_string();
     for _ in 0..n {
