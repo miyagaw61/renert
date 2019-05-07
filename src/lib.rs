@@ -56,6 +56,18 @@ macro_rules! stdin {
     })
 }
 
+#[macro_export]
+macro_rules! test {
+    (name = $name:ident, target = $target:ident, $($input:expr => $output:expr),* $(,)*) => (
+        #[test]
+        fn $name() {
+            $(
+                assert_eq!($target($input.to_string()), $output);
+            )*
+        }
+    );
+}
+
 // ref: tanakh <https://qiita.com/tanakh/items/0ba42c7ca36cd29d0ac8>
 // diff: Don't lock stdin
 #[macro_export]
