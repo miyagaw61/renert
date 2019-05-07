@@ -247,91 +247,6 @@ pub fn my_open(filename: &str, flag: &str) -> Result<std::fs::File, String> {
     return op.open(filename).map_err(|e| e.to_string());
 }
 
-pub fn npop(v: &mut Vec<char>, n: i32) -> Result<String, String> {
-    let mut res: Vec<char> = Vec::new();
-    for _ in 0..n {
-        let c = v.pop().ok_or("".to_string())?;
-        res.push(c);
-    }
-    res.reverse();
-    let ret: String = res.iter().map(|c| *c).collect();
-    return Ok(ret);
-}
-
-pub fn nget(v: &Vec<char>, n: i32) -> Result<String, String> {
-    let mut tmp_v = v.clone();
-    let res = npop(&mut tmp_v, n)?;
-    return Ok(res);
-}
-
-pub fn is_valid_range(v: &Vec<char>, idx_a: i32, idx_b: i32) -> bool {
-    let mut can = true;
-    if idx_a < 0 {
-        can = false;
-    }
-    let v_len = v.len() as i32;
-    if v_len < idx_b {
-        can = false;
-    }
-    return can;
-}
-
-pub fn get_range(v: &Vec<char>, idx_a: i32, idx_b: i32) -> Result<String, String> {
-    if ! is_valid_range(v, idx_a, idx_b) {
-        return Err("".to_string());
-    }
-    let mut res = String::new();
-    for (i,c) in v.iter().enumerate() {
-        let i = i as i32;
-        if i < idx_a {
-            continue;
-        }
-        if idx_b <= i {
-            break;
-        }
-        res.push(*c);
-    }
-    return Ok(res);
-}
-
-pub fn pop_range(v: &mut Vec<char>, idx_a: i32, idx_b: i32) -> Result<String, String> {
-    if ! is_valid_range(v, idx_a, idx_b) {
-        return Err("".to_string());
-    }
-    let mut res = String::new();
-    let mut pop_idxs: Vec<i32> = Vec::new();
-    for (i,c) in v.iter().enumerate() {
-        let i = i as i32;
-        if i < idx_a {
-            continue;
-        }
-        if idx_b <= i {
-            break;
-        }
-        res.push(*c);
-        pop_idxs.push(i);
-    }
-    for _ in 0..pop_idxs.len() {
-        match pop_idxs.pop() {
-            Some(idx) => {
-                v.remove(idx as usize);
-            },
-            None => {}
-        }
-    }
-    return Ok(res);
-}
-
-pub fn str_mul(s: &str, n: i32) -> String {
-    let mut res: String = "".to_string();
-    for _ in 0..n {
-        for c in s.chars() {
-            res.push(c);
-        }
-    }
-    return res;
-}
-
 pub fn bytes_mul(bytes: &[u8], n: i32) -> std::vec::Vec<u8> {
     let mut res = vec![];
     for _ in 0..n {
@@ -340,4 +255,160 @@ pub fn bytes_mul(bytes: &[u8], n: i32) -> std::vec::Vec<u8> {
         }
     }
     return res;
+}
+
+pub trait StrUtils {
+    fn npop(&mut self, n: usize) -> Result<String, String>;
+    fn nget(&self, n: usize) -> Result<String, String>;
+    fn is_valid_range(&self, idx_a: usize, idx_b: usize) -> bool;
+    fn get_range(&self, idx_a: usize, idx_b: usize) -> Result<String, String>;
+    fn pop_range(&mut self, idx_a: usize, idx_b: usize) -> Result<String, String>;
+    fn mul(&self, n: usize) -> String;
+}
+
+impl StrUtils for Vec<char> {
+    fn npop(&mut self, n: usize) -> Result<String, String> {
+        let mut pushed: Vec<char> = Vec::new();
+        for _ in 0..n {
+            let c = self.pop().ok_or("".to_string())?;
+            pushed.push(c);
+        }
+        pushed.reverse();
+        let ret: String = pushed.iter().map(|c| *c).collect();
+        Ok(ret)
+    }
+
+    fn nget(&self, n: usize) -> Result<String, String> {
+        let len = self.len();
+        if n > len {
+            return Err("too large num".to_string());
+        }
+        let mut pushed: Vec<char> = Vec::new();
+        let mut itr = self.iter().rev();
+        for _ in 0..n {
+            match itr.next() {
+                Some(&c) => {
+                    pushed.push(c);
+                },
+                None => {
+                    return Err("error occurred in nget".to_string());
+                }
+            }
+        }
+        pushed.reverse();
+        Ok(pushed.iter().collect::<String>())
+    }
+
+    fn is_valid_range(&self, idx_a: usize, idx_b: usize) -> bool {
+        let mut can = true;
+        let self_len = self.len();
+        if self_len < idx_a {
+            can = false;
+        }
+        if self_len < idx_b {
+            can = false;
+        }
+        can
+    }
+
+    fn get_range(&self, idx_a: usize, idx_b: usize) -> Result<String, String> {
+        if ! self.is_valid_range(idx_a, idx_b) {
+            return Err("invalid range".to_string());
+        }
+        let mut res = String::new();
+        for (i,c) in self.iter().enumerate() {
+            let i = i;
+            if i < idx_a {
+                continue;
+            }
+            if idx_b <= i {
+                break;
+            }
+            res.push(*c);
+        }
+        Ok(res)
+    }
+
+    fn pop_range(&mut self, idx_a: usize, idx_b: usize) -> Result<String, String> {
+        if ! self.is_valid_range(idx_a, idx_b) {
+            return Err("invalid range".to_string());
+        }
+        let mut res = String::new();
+        let mut pop_idxs: Vec<usize> = Vec::new();
+        for (i,c) in self.iter().enumerate() {
+            let i = i;
+            if i < idx_a {
+                continue;
+            }
+            if idx_b <= i {
+                break;
+            }
+            res.push(*c);
+            pop_idxs.push(i);
+        }
+        for _ in 0..pop_idxs.len() {
+            match pop_idxs.pop() {
+                Some(idx) => {
+                    self.remove(idx as usize);
+                },
+                None => {}
+            }
+        }
+        Ok(res)
+    }
+
+    fn mul(&self, n: usize) -> String {
+        let self_str: String = self.iter().collect();
+        let mut res: String = String::new();
+        for _ in 0..n {
+            res.push_str(&self_str);
+        }
+        res
+    }
+}
+
+impl StrUtils for String {
+    fn npop(&mut self, n: usize) -> Result<String, String> {
+        let mut self_chars: Vec<char> = self.chars().collect();
+        match self_chars.npop(n) {
+            Ok(poped) => {
+                *self = self_chars.iter().collect::<String>();
+                Ok(poped)
+            },
+            Err(e) => {
+                Err(e)
+            }
+        }
+    }
+    fn nget(&self, n: usize) -> Result<String, String> {
+        let self_chars: Vec<char> = self.chars().collect();
+        self_chars.nget(n)
+    }
+    fn is_valid_range(&self, idx_a: usize, idx_b: usize) -> bool {
+        let self_chars: Vec<char> = self.chars().collect();
+        self_chars.is_valid_range(idx_a, idx_b)
+    }
+    fn get_range(&self, idx_a: usize, idx_b: usize) -> Result<String, String> {
+        let self_chars: Vec<char> = self.chars().collect();
+        self_chars.get_range(idx_a, idx_b)
+    }
+    fn pop_range(&mut self, idx_a: usize, idx_b: usize) -> Result<String, String> {
+        let mut self_chars: Vec<char> = self.chars().collect();
+        match self_chars.pop_range(idx_a, idx_b) {
+            Ok(poped) => {
+                *self = self_chars.iter().collect::<String>();
+                Ok(poped)
+            },
+            Err(e) => {
+                Err(e)
+            }
+        }
+    }
+    fn mul(&self, n: usize) -> String {
+        let mut res: String = String::new();
+        for _ in 0..n {
+            res.push_str(self);
+        }
+        res
+    }
 }
