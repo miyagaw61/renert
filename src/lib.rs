@@ -4,6 +4,24 @@ use std::fs::OpenOptions;
 use std::process::Command;
 use colored::*;
 
+#[macro_export]
+macro_rules! d {
+    ($t:expr, $($e:expr),*) => {
+        #[cfg(debug_assertions)]
+        $({
+            let (e, mut err) = (stringify!($e), stderr());
+            writeln!(err, "{} = {:?}", $t.yellow().to_string(), $e).unwrap()
+        })*
+    };
+    ($($e:expr),*) => {
+        #[cfg(debug_assertions)]
+        $({
+            let (e, mut err) = (stringify!($e), stderr());
+            writeln!(err, "{} = {:?}", e.yellow().to_string(), $e).unwrap()
+        })*
+    };
+}
+
 // ref: tanakh <https://qiita.com/tanakh/items/0ba42c7ca36cd29d0ac8>
 // diff: Don't lock stdin
 #[macro_export]
