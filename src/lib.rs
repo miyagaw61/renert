@@ -22,6 +22,30 @@ macro_rules! d {
     };
 }
 
+#[macro_export]
+macro_rules! e {
+    ($($arg:tt)*) => {
+        #[cfg(debug_assertions)]
+        {
+            let mut err = stderr();
+            let e = format!($($arg)*);
+            write!(err, "{}", e.green().bold().to_string()).unwrap()
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! eln {
+    ($($arg:tt)*) => {
+        #[cfg(debug_assertions)]
+        {
+            let mut err = stderr();
+            let e = format!($($arg)*);
+            writeln!(err, "{}", e.green().bold().to_string()).unwrap()
+        }
+    };
+}
+
 // ref: tanakh <https://qiita.com/tanakh/items/0ba42c7ca36cd29d0ac8>
 // diff: Don't lock stdin
 #[macro_export]
