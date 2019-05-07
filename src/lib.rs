@@ -1,3 +1,5 @@
+#![allow(unused_imports)]
+
 extern crate colored;
 
 use std::cmp;
