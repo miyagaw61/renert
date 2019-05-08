@@ -257,6 +257,15 @@ pub fn bytes_mul(bytes: &[u8], n: i32) -> std::vec::Vec<u8> {
     return res;
 }
 
+pub trait VecUtils<T: Clone> {
+    fn npop(&mut self, n: usize) -> Result<Vec<T>, String>;
+    fn nget(&self, n: usize) -> Result<Vec<T>, String>;
+    fn is_valid_range(&self, idx_a: usize, idx_b: usize) -> bool;
+    fn get_range(&self, idx_a: usize, idx_b: usize) -> Result<Vec<T>, String>;
+    fn pop_range(&mut self, idx_a: usize, idx_b: usize) -> Result<Vec<T>, String>;
+    fn mul(&self, n: usize) -> Vec<T>;
+}
+
 pub trait StrUtils {
     fn npop(&mut self, n: usize) -> Result<String, String>;
     fn nget(&self, n: usize) -> Result<String, String>;
@@ -266,37 +275,28 @@ pub trait StrUtils {
     fn mul(&self, n: usize) -> String;
 }
 
-impl StrUtils for Vec<char> {
-    fn npop(&mut self, n: usize) -> Result<String, String> {
-        let mut pushed: Vec<char> = Vec::new();
+impl<T: Clone> VecUtils<T> for Vec<T> {
+    fn npop(&mut self, n: usize) -> Result<Vec<T>, String> {
+        //TODO: Add len check
+        let mut res: Vec<T> = Vec::new();
         for _ in 0..n {
-            let c = self.pop().ok_or("".to_string())?;
-            pushed.push(c);
+            let x = self.pop().ok_or("".to_string())?;
+            res.push(x);
         }
-        pushed.reverse();
-        let ret: String = pushed.iter().map(|c| *c).collect();
-        Ok(ret)
+        res.reverse();
+        Ok(res)
     }
 
-    fn nget(&self, n: usize) -> Result<String, String> {
+    fn nget(&self, n: usize) -> Result<Vec<T>, String> {
         let len = self.len();
         if n > len {
             return Err("too large num".to_string());
         }
-        let mut pushed: Vec<char> = Vec::new();
-        let mut itr = self.iter().rev();
-        for _ in 0..n {
-            match itr.next() {
-                Some(&c) => {
-                    pushed.push(c);
-                },
-                None => {
-                    return Err("error occurred in nget".to_string());
-                }
-            }
+        let mut res: Vec<T> = Vec::new();
+        for i in 0..n {
+            res.push(self[len - 1 - i].clone());
         }
-        pushed.reverse();
-        Ok(pushed.iter().collect::<String>())
+        Ok(res)
     }
 
     fn is_valid_range(&self, idx_a: usize, idx_b: usize) -> bool {
@@ -311,12 +311,12 @@ impl StrUtils for Vec<char> {
         can
     }
 
-    fn get_range(&self, idx_a: usize, idx_b: usize) -> Result<String, String> {
+    fn get_range(&self, idx_a: usize, idx_b: usize) -> Result<Vec<T>, String> {
         if ! self.is_valid_range(idx_a, idx_b) {
             return Err("invalid range".to_string());
         }
-        let mut res = String::new();
-        for (i,c) in self.iter().enumerate() {
+        let mut res: Vec<T> = Vec::new();
+        for (i,x) in self.into_iter().enumerate() {
             let i = i;
             if i < idx_a {
                 continue;
@@ -324,18 +324,18 @@ impl StrUtils for Vec<char> {
             if idx_b <= i {
                 break;
             }
-            res.push(*c);
+            res.push(x.clone());
         }
         Ok(res)
     }
 
-    fn pop_range(&mut self, idx_a: usize, idx_b: usize) -> Result<String, String> {
+    fn pop_range(&mut self, idx_a: usize, idx_b: usize) -> Result<Vec<T>, String> {
         if ! self.is_valid_range(idx_a, idx_b) {
             return Err("invalid range".to_string());
         }
-        let mut res = String::new();
+        let mut res: Vec<T> = Vec::new();
         let mut pop_idxs: Vec<usize> = Vec::new();
-        for (i,c) in self.iter().enumerate() {
+        for (i,x) in self.iter().enumerate() {
             let i = i;
             if i < idx_a {
                 continue;
@@ -343,7 +343,7 @@ impl StrUtils for Vec<char> {
             if idx_b <= i {
                 break;
             }
-            res.push(*c);
+            res.push(x.clone());
             pop_idxs.push(i);
         }
         for _ in 0..pop_idxs.len() {
@@ -357,11 +357,12 @@ impl StrUtils for Vec<char> {
         Ok(res)
     }
 
-    fn mul(&self, n: usize) -> String {
-        let self_str: String = self.iter().collect();
-        let mut res: String = String::new();
+    fn mul(&self, n: usize) -> Vec<T> {
+        let mut res: Vec<T> = Vec::new();
         for _ in 0..n {
-            res.push_str(&self_str);
+            for x in self {
+                res.push(x.clone());
+            }
         }
         res
     }
@@ -373,7 +374,7 @@ impl StrUtils for String {
         match self_chars.npop(n) {
             Ok(poped) => {
                 *self = self_chars.iter().collect::<String>();
-                Ok(poped)
+                Ok(poped.iter().collect::<String>())
             },
             Err(e) => {
                 Err(e)
@@ -382,7 +383,14 @@ impl StrUtils for String {
     }
     fn nget(&self, n: usize) -> Result<String, String> {
         let self_chars: Vec<char> = self.chars().collect();
-        self_chars.nget(n)
+        match self_chars.nget(n) {
+            Ok(v) => {
+                Ok(v.iter().collect::<String>())
+            },
+            Err(e) => {
+                Err(e)
+            }
+        }
     }
     fn is_valid_range(&self, idx_a: usize, idx_b: usize) -> bool {
         let self_chars: Vec<char> = self.chars().collect();
@@ -390,14 +398,21 @@ impl StrUtils for String {
     }
     fn get_range(&self, idx_a: usize, idx_b: usize) -> Result<String, String> {
         let self_chars: Vec<char> = self.chars().collect();
-        self_chars.get_range(idx_a, idx_b)
+        match self_chars.get_range(idx_a, idx_b) {
+            Ok(v) => {
+                Ok(v.iter().collect::<String>())
+            },
+            Err(e) => {
+                Err(e)
+            }
+        }
     }
     fn pop_range(&mut self, idx_a: usize, idx_b: usize) -> Result<String, String> {
         let mut self_chars: Vec<char> = self.chars().collect();
         match self_chars.pop_range(idx_a, idx_b) {
             Ok(poped) => {
                 *self = self_chars.iter().collect::<String>();
-                Ok(poped)
+                Ok(poped.iter().collect::<String>())
             },
             Err(e) => {
                 Err(e)
