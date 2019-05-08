@@ -277,7 +277,10 @@ pub trait StrUtils {
 
 impl<T: Clone> VecUtils<T> for Vec<T> {
     fn npop(&mut self, n: usize) -> Result<Vec<T>, String> {
-        //TODO: Add len check
+        let len = self.len();
+        if n > len {
+            return Err("too large num".to_string());
+        }
         let mut res: Vec<T> = Vec::new();
         for _ in 0..n {
             let x = self.pop().ok_or("".to_string())?;
