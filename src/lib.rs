@@ -24,7 +24,7 @@ use std::io::{
 use colored::*;
 
 #[macro_export]
-macro_rules! debug {
+macro_rules! debug_one {
     (($t:expr, $e:expr)) => {
         #[cfg(debug_assertions)]
         {
@@ -43,11 +43,11 @@ macro_rules! debug {
 }
 
 #[macro_export]
-macro_rules! d {
+macro_rules! debug {
     ($($tt:tt),*) => {
         #[cfg(debug_assertions)]
         $({
-            debug!($tt);
+            debug_one!($tt);
         })*
     };
 }
