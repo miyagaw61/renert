@@ -53,7 +53,17 @@ macro_rules! debug {
 }
 
 #[macro_export]
-macro_rules! e {
+macro_rules! d {
+    ($($tt:tt),*) => {
+        #[cfg(debug_assertions)]
+        $({
+            debug!($tt);
+        })*
+    };
+}
+
+#[macro_export]
+macro_rules! eprint {
     ($($arg:tt)*) => {
         #[cfg(debug_assertions)]
         {
@@ -65,13 +75,33 @@ macro_rules! e {
 }
 
 #[macro_export]
-macro_rules! eln {
+macro_rules! e {
+    ($($arg:tt)*) => {
+        #[cfg(debug_assertions)]
+        {
+            eprint!($arg);
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! eprintln {
     ($($arg:tt)*) => {
         #[cfg(debug_assertions)]
         {
             let mut err = stderr();
             let e = format!($($arg)*);
             writeln!(err, "{}", e.green().bold().to_string()).unwrap()
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! eln {
+    ($($arg:tt)*) => {
+        #[cfg(debug_assertions)]
+        {
+            eprintln!($arg);
         }
     };
 }
