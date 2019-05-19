@@ -79,7 +79,7 @@ macro_rules! e {
     ($($arg:tt)*) => {
         #[cfg(debug_assertions)]
         {
-            eprint!($arg);
+            eprint!($($arg)*);
         }
     };
 }
@@ -100,9 +100,9 @@ macro_rules! eprintln {
 macro_rules! eln {
     ($($arg:tt)*) => {
         #[cfg(debug_assertions)]
-        {
-            eprintln!($arg);
-        }
+        $({
+            eprintln!($($arg)*);
+        })*
     };
 }
 
