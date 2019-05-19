@@ -376,8 +376,8 @@ impl StrUtils for String {
         let mut self_chars: Vec<char> = self.chars().collect();
         match self_chars.npop(n) {
             Ok(poped) => {
-                *self = self_chars.iter().collect::<String>();
-                Ok(poped.iter().collect::<String>())
+                *self = self_chars.into_iter().collect::<String>();
+                Ok(poped.into_iter().collect::<String>())
             },
             Err(e) => {
                 Err(e)
@@ -388,7 +388,7 @@ impl StrUtils for String {
         let self_chars: Vec<char> = self.chars().collect();
         match self_chars.nget(n) {
             Ok(v) => {
-                Ok(v.iter().collect::<String>())
+                Ok(v.into_iter().collect::<String>())
             },
             Err(e) => {
                 Err(e)
@@ -403,7 +403,7 @@ impl StrUtils for String {
         let self_chars: Vec<char> = self.chars().collect();
         match self_chars.get_range(idx_a, idx_b) {
             Ok(v) => {
-                Ok(v.iter().collect::<String>())
+                Ok(v.into_iter().collect::<String>())
             },
             Err(e) => {
                 Err(e)
@@ -414,8 +414,8 @@ impl StrUtils for String {
         let mut self_chars: Vec<char> = self.chars().collect();
         match self_chars.pop_range(idx_a, idx_b) {
             Ok(poped) => {
-                *self = self_chars.iter().collect::<String>();
-                Ok(poped.iter().collect::<String>())
+                *self = self_chars.into_iter().collect::<String>();
+                Ok(poped.into_iter().collect::<String>())
             },
             Err(e) => {
                 Err(e)
