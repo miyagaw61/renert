@@ -2,17 +2,17 @@
 
 extern crate colored;
 
-use std::cmp;
-use std::process::{
+pub use std::cmp;
+pub use std::process::{
     exit,
     Command
 };
-use std::fs::OpenOptions;
-use std::collections::{
+pub use std::fs::OpenOptions;
+pub use std::collections::{
     HashMap,
     VecDeque
 };
-use std::io::{
+pub use std::io::{
     stdin,
     stdout,
     stderr,
@@ -21,7 +21,7 @@ use std::io::{
     BufReader,
     BufWriter
 };
-use colored::*;
+pub use colored::*;
 
 #[macro_export]
 macro_rules! debug_one {
