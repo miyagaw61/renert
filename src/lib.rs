@@ -394,6 +394,7 @@ impl StrUtils for String {
             }
         }
     }
+
     fn nget(&self, n: usize) -> Result<String, String> {
         let self_chars: Vec<char> = self.chars().collect();
         match self_chars.nget(n) {
@@ -405,10 +406,12 @@ impl StrUtils for String {
             }
         }
     }
+
     fn is_valid_range(&self, idx_a: usize, idx_b: usize) -> bool {
         let self_chars: Vec<char> = self.chars().collect();
         self_chars.is_valid_range(idx_a, idx_b)
     }
+
     fn get_range(&self, idx_a: usize, idx_b: usize) -> Result<String, String> {
         let self_chars: Vec<char> = self.chars().collect();
         match self_chars.get_range(idx_a, idx_b) {
@@ -420,6 +423,7 @@ impl StrUtils for String {
             }
         }
     }
+
     fn pop_range(&mut self, idx_a: usize, idx_b: usize) -> Result<String, String> {
         let mut self_chars: Vec<char> = self.chars().collect();
         match self_chars.pop_range(idx_a, idx_b) {
@@ -432,6 +436,7 @@ impl StrUtils for String {
             }
         }
     }
+
     fn mul(&self, n: usize) -> String {
         let mut res: String = String::new();
         for _ in 0..n {
