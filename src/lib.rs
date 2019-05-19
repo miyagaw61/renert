@@ -24,19 +24,29 @@ use std::io::{
 use colored::*;
 
 #[macro_export]
-macro_rules! d {
-    ($t:expr, $($e:expr),*) => {
+macro_rules! debug {
+    (($t:expr, $e:expr)) => {
         #[cfg(debug_assertions)]
-        $({
+        {
             let (e, mut err) = (stringify!($e), stderr());
-            writeln!(err, "{} = {:?}", $t.yellow().to_string(), $e).unwrap()
-        })*
+            writeln!(err, "\x1B[33m{}\x1B[0m = {:?}", $t, $e).unwrap()
+        }
     };
-    ($($e:expr),*) => {
+    ($e:expr) => {
+        #[cfg(debug_assertions)]
+        {
+            let (e, mut err) = (stringify!($e), stderr());
+            writeln!(err, "\x1B[33m{}\x1B[0m = {:?}", e, $e).unwrap()
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! d {
+    ($($tt:tt),*) => {
         #[cfg(debug_assertions)]
         $({
-            let (e, mut err) = (stringify!($e), stderr());
-            writeln!(err, "{} = {:?}", e.yellow().to_string(), $e).unwrap()
+            debug!($tt);
         })*
     };
 }
