@@ -100,9 +100,9 @@ macro_rules! err_println {
 macro_rules! eln {
     ($($arg:tt)*) => {
         #[cfg(debug_assertions)]
-        $({
+        {
             err_println!($($arg)*);
-        })*
+        }
     };
 }
 
