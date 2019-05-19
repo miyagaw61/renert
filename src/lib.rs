@@ -63,7 +63,7 @@ macro_rules! d {
 }
 
 #[macro_export]
-macro_rules! eprint {
+macro_rules! err_print {
     ($($arg:tt)*) => {
         #[cfg(debug_assertions)]
         {
@@ -79,13 +79,13 @@ macro_rules! e {
     ($($arg:tt)*) => {
         #[cfg(debug_assertions)]
         {
-            eprint!($($arg)*);
+            err_print!($($arg)*);
         }
     };
 }
 
 #[macro_export]
-macro_rules! eprintln {
+macro_rules! err_println {
     ($($arg:tt)*) => {
         #[cfg(debug_assertions)]
         {
@@ -101,7 +101,7 @@ macro_rules! eln {
     ($($arg:tt)*) => {
         #[cfg(debug_assertions)]
         $({
-            eprintln!($($arg)*);
+            err_println!($($arg)*);
         })*
     };
 }
