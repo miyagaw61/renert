@@ -28,7 +28,7 @@ macro_rules! debug {
     (($t:expr, $e:expr)) => {
         #[cfg(debug_assertions)]
         {
-            let (e, mut err) = (stringify!($e), stderr());
+            let mut err = stderr();
             writeln!(err, "\x1B[33m{}\x1B[0m = {:?}", $t, $e).unwrap()
         }
     };
