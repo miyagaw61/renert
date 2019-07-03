@@ -1,6 +1,7 @@
 #![allow(unused_imports)]
 
 extern crate colored;
+extern crate byteorder;
 
 pub use std::cmp;
 pub use std::process::{
@@ -22,6 +23,7 @@ pub use std::io::{
     BufWriter
 };
 pub use colored::*;
+pub use byteorder::{ByteOrder, NativeEndian, LittleEndian, BigEndian};
 
 #[macro_export]
 macro_rules! debug_one {
@@ -304,6 +306,10 @@ pub trait StrUtils {
     fn mul(&self, n: usize) -> String;
 }
 
+pub trait BytesUtils {
+    fn convert_u32(&self, endian: &str) -> Result<u32, String>;
+}
+
 impl<T: Clone> VecUtils<T> for Vec<T> {
     fn npop(&mut self, n: usize) -> Result<Vec<T>, String> {
         let len = self.len();
@@ -397,6 +403,28 @@ impl<T: Clone> VecUtils<T> for Vec<T> {
             }
         }
         res
+    }
+}
+
+impl BytesUtils for Vec<u8> {
+    fn convert_u32(&self, endian: &str) -> Result<u32, String> {
+        let s: &[u8] = &self[..];
+        let mut _n: u32 = 0;
+        match endian {
+            "native" => {
+                _n = NativeEndian::read_u32(s);
+            },
+            "little" => {
+                _n = LittleEndian::read_u32(s);
+            },
+            "big" => {
+                _n = BigEndian::read_u32(s);
+            }
+            _ => {
+                return Err("".to_string());
+            }
+        }
+        Ok(_n)
     }
 }
 
