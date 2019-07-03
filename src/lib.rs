@@ -176,6 +176,31 @@ macro_rules! read_value {
     };
 }
 
+macro_rules! to_T {
+    ($v: expr, $e: expr, $n: ident, $t: ty) => {
+        {
+            let s: &[u8] = &$v[..];
+            let mut _n: $t = 0;
+            let endian = $e;
+            match endian {
+                "native" => {
+                    _n = NativeEndian::$n(s);
+                },
+                "little" => {
+                    _n = LittleEndian::$n(s);
+                },
+                "big" => {
+                    _n = BigEndian::$n(s);
+                }
+                _ => {
+                    return Err("".to_string());
+                }
+            }
+            Ok(_n)
+        }
+    }
+}
+
 pub struct SystemResult {
     pub stdout: String,
     pub stderr: String,
@@ -308,6 +333,8 @@ pub trait StrUtils {
 
 pub trait BytesUtils {
     fn to_u32(&self, endian: &str) -> Result<u32, String>;
+    fn to_u64(&self, endian: &str) -> Result<u64, String>;
+    fn to_u128(&self, endian: &str) -> Result<u128, String>;
 }
 
 impl<T: Clone> VecUtils<T> for Vec<T> {
@@ -408,23 +435,13 @@ impl<T: Clone> VecUtils<T> for Vec<T> {
 
 impl BytesUtils for Vec<u8> {
     fn to_u32(&self, endian: &str) -> Result<u32, String> {
-        let s: &[u8] = &self[..];
-        let mut _n: u32 = 0;
-        match endian {
-            "native" => {
-                _n = NativeEndian::read_u32(s);
-            },
-            "little" => {
-                _n = LittleEndian::read_u32(s);
-            },
-            "big" => {
-                _n = BigEndian::read_u32(s);
-            }
-            _ => {
-                return Err("".to_string());
-            }
-        }
-        Ok(_n)
+        to_T!(&self, endian, read_u32, u32)
+    }
+    fn to_u64(&self, endian: &str) -> Result<u64, String> {
+        to_T!(&self, endian, read_u64, u64)
+    }
+    fn to_u128(&self, endian: &str) -> Result<u128, String> {
+        to_T!(&self, endian, read_u128, u128)
     }
 }
 
