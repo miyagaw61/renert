@@ -307,7 +307,7 @@ pub trait StrUtils {
 }
 
 pub trait BytesUtils {
-    fn convert_u32(&self, endian: &str) -> Result<u32, String>;
+    fn to_u32(&self, endian: &str) -> Result<u32, String>;
 }
 
 impl<T: Clone> VecUtils<T> for Vec<T> {
@@ -407,7 +407,7 @@ impl<T: Clone> VecUtils<T> for Vec<T> {
 }
 
 impl BytesUtils for Vec<u8> {
-    fn convert_u32(&self, endian: &str) -> Result<u32, String> {
+    fn to_u32(&self, endian: &str) -> Result<u32, String> {
         let s: &[u8] = &self[..];
         let mut _n: u32 = 0;
         match endian {
