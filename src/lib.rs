@@ -2,6 +2,7 @@
 
 extern crate colored;
 extern crate byteorder;
+extern crate find_folder;
 
 pub use std::cmp;
 pub use std::process::{
@@ -508,4 +509,10 @@ impl StrUtils for String {
         }
         res
     }
+}
+
+pub fn search_dir(dirname: &str, kids_depth: u8, parents_depth: u8) -> Result<std::path::PathBuf, find_folder::Error> {
+    let dir = find_folder::Search::KidsThenParents(kids_depth, parents_depth)
+        .for_folder(dirname);
+    dir
 }
