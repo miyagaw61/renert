@@ -177,6 +177,26 @@ macro_rules! read_value {
     };
 }
 
+#[macro_export]
+macro_rules! test {
+    (name = $name:ident, $($input:expr => $output:expr),* $(,)*) => (
+        #[test]
+        fn $name() {
+            $(
+                assert_eq!(solve($input.to_string()), $output);
+            )*
+        }
+    );
+    ($($input:expr => $output:expr),* $(,)*) => (
+        #[test]
+        fn solve_test() {
+            $(
+                assert_eq!(solve($input.to_string()), $output);
+            )*
+        }
+    )
+}
+
 macro_rules! to_T {
     ($v: expr, $e: expr, $n: ident, $t: ty) => {
         {
