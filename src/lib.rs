@@ -348,6 +348,10 @@ pub trait VecUtils<T: Clone> {
     fn mul(&self, n: usize) -> Vec<T>;
 }
 
+pub trait PartialEqVecUtils<T: Clone + PartialEq> {
+    fn index(&self, search_item: T) -> Result<usize, String>;
+}
+
 pub trait StrUtils {
     fn npop(&mut self, n: usize) -> Result<String, String>;
     fn nget(&self, n: usize) -> Result<String, String>;
@@ -460,6 +464,15 @@ impl<T: Clone> VecUtils<T> for Vec<T> {
     }
 }
 
+impl<T: Clone + PartialEq> PartialEqVecUtils<T> for Vec<T> {
+    fn index(&self, search_item: T) -> Result<usize, String> {
+        match self.iter().position(|x| *x == search_item) {
+            Some(idx) => return Ok(idx),
+            None => return Err("not found".to_string()),
+        }
+    }
+}
+
 impl BytesUtils for Vec<u8> {
     fn to_u32(&self, endian: &str) -> Result<u32, String> {
         to_T!(&self, endian, read_u32, u32)
@@ -548,11 +561,25 @@ pub fn search_dir(
 #[cfg(test)]
 mod tests {
     use super::*;
+
     #[test]
-    fn test_index() {
+    fn test_index_of_str() {
         let s = "Hello, World!".to_string();
         let search_str = "World";
         let world_idx = s.index(search_str).unwrap();
         assert_eq!(world_idx, 7);
+    }
+
+    #[test]
+    fn test_index_of_vec() {
+        let v = vec![
+            "Hello".to_string(),
+            ",".to_string(),
+            "World".to_string(),
+            "!".to_string(),
+        ];
+        let search_str = "World".to_string();
+        let world_idx = v.index(search_str).unwrap();
+        assert_eq!(world_idx, 2);
     }
 }
