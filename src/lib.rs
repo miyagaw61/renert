@@ -355,6 +355,7 @@ pub trait StrUtils {
     fn get_range(&self, idx_a: usize, idx_b: usize) -> Result<String, String>;
     fn pop_range(&mut self, idx_a: usize, idx_b: usize) -> Result<String, String>;
     fn mul(&self, n: usize) -> String;
+    fn index(&self, search_str: &str) -> Result<usize, String>;
 }
 
 pub trait BytesUtils {
@@ -522,6 +523,17 @@ impl StrUtils for String {
         }
         res
     }
+
+    fn index(&self, search_str: &str) -> Result<usize, String> {
+        if let Some(start_idx) = self
+            .char_indices()
+            .position(|(i, _)| self[i..].starts_with(search_str))
+        {
+            return Ok(start_idx);
+        } else {
+            return Err("not found".to_string());
+        }
+    }
 }
 
 pub fn search_dir(
@@ -531,4 +543,16 @@ pub fn search_dir(
 ) -> Result<std::path::PathBuf, find_folder::Error> {
     let dir = find_folder::Search::KidsThenParents(kids_depth, parents_depth).for_folder(dirname);
     dir
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_index() {
+        let s = "Hello, World!".to_string();
+        let search_str = "World";
+        let world_idx = s.index(search_str).unwrap();
+        assert_eq!(world_idx, 7);
+    }
 }
