@@ -206,6 +206,7 @@ macro_rules! to_T {
     }};
 }
 
+#[derive(Debug)]
 pub struct SystemResult {
     pub stdout: String,
     pub stderr: String,
