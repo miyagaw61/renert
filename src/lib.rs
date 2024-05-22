@@ -1,30 +1,16 @@
 #![allow(unused_imports)]
 
-extern crate colored;
 extern crate byteorder;
+extern crate colored;
 extern crate find_folder;
 
-pub use std::cmp;
-pub use std::process::{
-    exit,
-    Command
-};
-pub use std::fs::OpenOptions;
-pub use std::collections::{
-    HashMap,
-    VecDeque
-};
-pub use std::io::{
-    stdin,
-    stdout,
-    stderr,
-    Read,
-    Write,
-    BufReader,
-    BufWriter
-};
+pub use byteorder::{BigEndian, ByteOrder, LittleEndian, NativeEndian};
 pub use colored::*;
-pub use byteorder::{ByteOrder, NativeEndian, LittleEndian, BigEndian};
+pub use std::cmp;
+pub use std::collections::{HashMap, VecDeque};
+pub use std::fs::OpenOptions;
+pub use std::io::{stderr, stdin, stdout, BufReader, BufWriter, Read, Write};
+pub use std::process::{exit, Command};
 
 #[macro_export]
 macro_rules! debug_one {
@@ -111,12 +97,12 @@ macro_rules! eln {
 
 #[macro_export]
 macro_rules! stdin {
-    () => ({
+    () => {{
         use std::io::Read;
         let mut s = String::new();
         std::io::stdin().read_to_string(&mut s).unwrap();
         s
-    })
+    }};
 }
 
 // ref: tanakh <https://qiita.com/tanakh/items/0ba42c7ca36cd29d0ac8>
@@ -198,28 +184,26 @@ macro_rules! test {
 }
 
 macro_rules! to_T {
-    ($v: expr, $e: expr, $n: ident, $t: ty) => {
-        {
-            let s: &[u8] = &$v[..];
-            let mut _n: $t = 0;
-            let endian = $e;
-            match endian {
-                "native" => {
-                    _n = NativeEndian::$n(s);
-                },
-                "little" => {
-                    _n = LittleEndian::$n(s);
-                },
-                "big" => {
-                    _n = BigEndian::$n(s);
-                }
-                _ => {
-                    return Err("".to_string());
-                }
+    ($v: expr, $e: expr, $n: ident, $t: ty) => {{
+        let s: &[u8] = &$v[..];
+        let mut _n: $t = 0;
+        let endian = $e;
+        match endian {
+            "native" => {
+                _n = NativeEndian::$n(s);
             }
-            Ok(_n)
+            "little" => {
+                _n = LittleEndian::$n(s);
+            }
+            "big" => {
+                _n = BigEndian::$n(s);
+            }
+            _ => {
+                return Err("".to_string());
+            }
         }
-    }
+        Ok(_n)
+    }};
 }
 
 pub struct SystemResult {
@@ -229,10 +213,18 @@ pub struct SystemResult {
 
 impl SystemResult {
     fn new(output: std::process::Output) -> Result<SystemResult, SystemResult> {
-        let mut stdout: Vec<char> = std::str::from_utf8(&output.stdout[..]).unwrap().to_string().chars().collect();
+        let mut stdout: Vec<char> = std::str::from_utf8(&output.stdout[..])
+            .unwrap()
+            .to_string()
+            .chars()
+            .collect();
         stdout.pop();
         let stdout: String = stdout.into_iter().collect();
-        let mut stderr: Vec<char> = std::str::from_utf8(&output.stderr[..]).unwrap().to_string().chars().collect();
+        let mut stderr: Vec<char> = std::str::from_utf8(&output.stderr[..])
+            .unwrap()
+            .to_string()
+            .chars()
+            .collect();
         stderr.pop();
         let stderr: String = stderr.into_iter().collect();
         let result = SystemResult {
@@ -250,7 +242,7 @@ impl From<String> for SystemResult {
     fn from(e: String) -> SystemResult {
         let system_result = SystemResult {
             stdout: "".to_string(),
-            stderr: format!("Failed to excute process: {}", e)
+            stderr: format!("Failed to excute process: {}", e),
         };
         return system_result;
     }
@@ -260,8 +252,9 @@ pub fn my_eprint(msg: String) {
     let header = [
         "== ".red().to_string(),
         "[+]ERROR".red().bold().to_string(),
-        " =====================".red().to_string()
-    ].join("");
+        " =====================".red().to_string(),
+    ]
+    .join("");
     println!("{}", header);
     println!("{}", msg);
     println!("{}", "=================================".red().to_string());
@@ -275,7 +268,7 @@ pub fn system_on_shell(command: &str) -> Result<SystemResult, SystemResult> {
         .map_err(|e| format!("{}: \"{}\"", e.to_string(), command));
     match oput {
         Ok(oput) => return SystemResult::new(oput),
-        Err(e) => return Err(SystemResult::from(e))
+        Err(e) => return Err(SystemResult::from(e)),
     }
 }
 
@@ -285,7 +278,9 @@ pub fn process_on_shell(command: &str) {
         .arg(command)
         .spawn()
         .expect(format!("Failed to execute process: \"sh -c '{}'\"", command).as_str());
-    child.wait().expect(format!("Failed to execute process: \"sh -c '{}'\"", command).as_str());
+    child
+        .wait()
+        .expect(format!("Failed to execute process: \"sh -c '{}'\"", command).as_str());
 }
 
 pub fn system(command: &[&str]) -> Result<SystemResult, SystemResult> {
@@ -295,16 +290,25 @@ pub fn system(command: &[&str]) -> Result<SystemResult, SystemResult> {
         .map_err(|e| format!("{}: \"{}\"", e.to_string(), command.join(" ")));
     match oput {
         Ok(oput) => return SystemResult::new(oput),
-        Err(e) => return Err(SystemResult::from(e))
+        Err(e) => return Err(SystemResult::from(e)),
     }
 }
 
 pub fn process(command: &[&str]) {
-    let mut child = Command::new(command[0])
-        .args(&command[1..])
-        .spawn()
-        .expect(format!("Failed to execute process: \"sh -c '{}'\"", command.join(" ")).as_str());
-    child.wait().expect(format!("Failed to execute process: \"sh -c '{}'\"", command.join(" ")).as_str());
+    let mut child = Command::new(command[0]).args(&command[1..]).spawn().expect(
+        format!(
+            "Failed to execute process: \"sh -c '{}'\"",
+            command.join(" ")
+        )
+        .as_str(),
+    );
+    child.wait().expect(
+        format!(
+            "Failed to execute process: \"sh -c '{}'\"",
+            command.join(" ")
+        )
+        .as_str(),
+    );
 }
 
 pub fn my_open(filename: &str, flag: &str) -> Result<std::fs::File, String> {
@@ -398,11 +402,11 @@ impl<T: Clone> VecUtils<T> for Vec<T> {
     }
 
     fn get_range(&self, idx_a: usize, idx_b: usize) -> Result<Vec<T>, String> {
-        if ! self.is_valid_range(idx_a, idx_b) {
+        if !self.is_valid_range(idx_a, idx_b) {
             return Err("invalid range".to_string());
         }
         let mut res: Vec<T> = Vec::new();
-        for (i,x) in self.into_iter().enumerate() {
+        for (i, x) in self.into_iter().enumerate() {
             let i = i;
             if i < idx_a {
                 continue;
@@ -416,12 +420,12 @@ impl<T: Clone> VecUtils<T> for Vec<T> {
     }
 
     fn pop_range(&mut self, idx_a: usize, idx_b: usize) -> Result<Vec<T>, String> {
-        if ! self.is_valid_range(idx_a, idx_b) {
+        if !self.is_valid_range(idx_a, idx_b) {
             return Err("invalid range".to_string());
         }
         let mut res: Vec<T> = Vec::new();
         let mut pop_idxs: Vec<usize> = Vec::new();
-        for (i,x) in self.iter().enumerate() {
+        for (i, x) in self.iter().enumerate() {
             let i = i;
             if i < idx_a {
                 continue;
@@ -436,7 +440,7 @@ impl<T: Clone> VecUtils<T> for Vec<T> {
             match pop_idxs.pop() {
                 Some(idx) => {
                     self.remove(idx as usize);
-                },
+                }
                 None => {}
             }
         }
@@ -473,22 +477,16 @@ impl StrUtils for String {
             Ok(poped) => {
                 *self = self_chars.into_iter().collect::<String>();
                 Ok(poped.into_iter().collect::<String>())
-            },
-            Err(e) => {
-                Err(e)
             }
+            Err(e) => Err(e),
         }
     }
 
     fn nget(&self, n: usize) -> Result<String, String> {
         let self_chars: Vec<char> = self.chars().collect();
         match self_chars.nget(n) {
-            Ok(v) => {
-                Ok(v.into_iter().collect::<String>())
-            },
-            Err(e) => {
-                Err(e)
-            }
+            Ok(v) => Ok(v.into_iter().collect::<String>()),
+            Err(e) => Err(e),
         }
     }
 
@@ -500,12 +498,8 @@ impl StrUtils for String {
     fn get_range(&self, idx_a: usize, idx_b: usize) -> Result<String, String> {
         let self_chars: Vec<char> = self.chars().collect();
         match self_chars.get_range(idx_a, idx_b) {
-            Ok(v) => {
-                Ok(v.into_iter().collect::<String>())
-            },
-            Err(e) => {
-                Err(e)
-            }
+            Ok(v) => Ok(v.into_iter().collect::<String>()),
+            Err(e) => Err(e),
         }
     }
 
@@ -515,10 +509,8 @@ impl StrUtils for String {
             Ok(poped) => {
                 *self = self_chars.into_iter().collect::<String>();
                 Ok(poped.into_iter().collect::<String>())
-            },
-            Err(e) => {
-                Err(e)
             }
+            Err(e) => Err(e),
         }
     }
 
@@ -531,8 +523,11 @@ impl StrUtils for String {
     }
 }
 
-pub fn search_dir(dirname: &str, kids_depth: u8, parents_depth: u8) -> Result<std::path::PathBuf, find_folder::Error> {
-    let dir = find_folder::Search::KidsThenParents(kids_depth, parents_depth)
-        .for_folder(dirname);
+pub fn search_dir(
+    dirname: &str,
+    kids_depth: u8,
+    parents_depth: u8,
+) -> Result<std::path::PathBuf, find_folder::Error> {
+    let dir = find_folder::Search::KidsThenParents(kids_depth, parents_depth).for_folder(dirname);
     dir
 }
